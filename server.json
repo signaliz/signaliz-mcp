@@ -6,6 +6,7 @@
   "version": "2.0.0",
   "websiteUrl": "https://signaliz.com",
   "repository": {
+    "id": "1236179880",
     "url": "https://github.com/signaliz/signaliz-mcp",
     "source": "github"
   },
