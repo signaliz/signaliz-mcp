@@ -1,0 +1,612 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "server": {
+    "name": "Signaliz",
+    "mcpName": "io.github.signaliz/signaliz-mcp",
+    "endpoint": "https://api.signaliz.com/functions/v1/signaliz-mcp",
+    "transport": "streamable-http"
+  },
+  "tools": [
+    {
+      "name": "list_capabilities",
+      "title": "List Signaliz capabilities",
+      "description": "List capabilities available in the Signaliz system builder, organized by INGEST, PREPARE, ENRICH, LOGIC, ACT, and OUTPUT categories.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "find_emails_with_verification",
+      "title": "Find and verify one email",
+      "description": "Find a professional email address for one contact from a name and company domain, then verify deliverability. For batches, use find_and_verify_emails.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "company_domain": {
+            "type": "string",
+            "description": "Company website domain, for example stripe.com."
+          },
+          "company_name": {
+            "type": "string",
+            "description": "Optional company name for disambiguation."
+          },
+          "first_name": {
+            "type": "string",
+            "description": "First name. Use with last_name as an alternative to full_name."
+          },
+          "last_name": {
+            "type": "string",
+            "description": "Last name. Use with first_name as an alternative to full_name."
+          },
+          "full_name": {
+            "type": "string",
+            "description": "Full name, for example John Smith."
+          },
+          "linkedin_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional LinkedIn profile URL."
+          }
+        },
+        "required": [
+          "company_domain"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "find_and_verify_emails",
+      "title": "Find and verify emails in batch",
+      "description": "Submit up to 5,000 contacts for asynchronous professional email finding and deliverability verification. Returns a job_id for check_job_status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "contacts": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5000,
+            "items": {
+              "type": "object",
+              "properties": {
+                "company_domain": {
+                  "type": "string"
+                },
+                "company_name": {
+                  "type": "string"
+                },
+                "first_name": {
+                  "type": "string"
+                },
+                "last_name": {
+                  "type": "string"
+                },
+                "full_name": {
+                  "type": "string"
+                },
+                "linkedin_url": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": true
+            }
+          }
+        },
+        "required": [
+          "contacts"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "verify_email",
+      "title": "Verify one email",
+      "description": "Verify one email address for deliverability. For multiple emails, use verify_emails.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "description": "Email address to verify."
+          }
+        },
+        "required": [
+          "email"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "verify_emails",
+      "title": "Verify emails in batch",
+      "description": "Submit up to 5,000 email addresses for asynchronous deliverability verification. Returns a job_id for check_job_status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "emails": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5000,
+            "items": {
+              "oneOf": [
+                {
+                  "type": "string",
+                  "format": "email"
+                },
+                {
+                  "type": "object",
+                  "properties": {
+                    "email": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  },
+                  "required": [
+                    "email"
+                  ],
+                  "additionalProperties": true
+                }
+              ]
+            }
+          },
+          "config": {
+            "type": "object",
+            "properties": {
+              "skip_catch_all_verification": {
+                "type": "boolean",
+                "description": "Skip catch-all domain checking for faster but less complete verification."
+              }
+            },
+            "additionalProperties": false
+          }
+        },
+        "required": [
+          "emails"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "enrich_company_signals",
+      "title": "Enrich company signals",
+      "description": "Discover structured business signals and intelligence for companies, including hiring, funding, product launches, partnerships, leadership changes, expansion, acquisitions, awards, regulatory events, and earnings.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "companies": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 5000,
+            "items": {
+              "type": "object",
+              "properties": {
+                "domain": {
+                  "type": "string"
+                },
+                "company_name": {
+                  "type": "string"
+                }
+              },
+              "additionalProperties": true
+            }
+          },
+          "domain": {
+            "type": "string",
+            "description": "Single-company mode domain."
+          },
+          "company_domain": {
+            "type": "string",
+            "description": "Alias for domain in single-company mode."
+          },
+          "company_name": {
+            "type": "string",
+            "description": "Single-company mode company name."
+          },
+          "signal_types": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "hiring",
+                "funding",
+                "product_launch",
+                "partnership",
+                "leadership_change",
+                "expansion",
+                "acquisition",
+                "award",
+                "regulatory",
+                "earnings"
+              ]
+            }
+          },
+          "lookback_days": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 90
+          },
+          "enable_deep_search": {
+            "type": "boolean"
+          },
+          "research_prompt": {
+            "type": "string"
+          },
+          "model": {
+            "type": "string"
+          },
+          "config": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "execute_primitive",
+      "title": "Execute primitive capability",
+      "description": "Run a small synchronous job for ad-hoc email finding, email verification, company signal enrichment, custom AI prompts, data cleaning, or generic HTTP requests. Use dedicated batch tools or create_system plus run_system for larger jobs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "capability_id": {
+            "type": "string",
+            "enum": [
+              "custom_ai_prompt",
+              "find_verified_emails",
+              "verify_emails",
+              "enrich_company_signals",
+              "generic_http_request",
+              "ai_clean"
+            ]
+          },
+          "input_data": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 100,
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "config": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "field_mappings": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            }
+          },
+          "force_fulfillment": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "capability_id",
+          "input_data"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "check_job_status",
+      "title": "Check job status",
+      "description": "Poll async jobs returned by batch tools and retrieve paginated results.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "job_id": {
+            "type": "string"
+          },
+          "page": {
+            "type": "integer",
+            "minimum": 1,
+            "default": 1
+          },
+          "page_size": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500,
+            "default": 100
+          },
+          "include_errors": {
+            "type": "boolean",
+            "default": true
+          },
+          "include_partial_results": {
+            "type": "boolean",
+            "default": false
+          },
+          "_poll_count": {
+            "type": "integer",
+            "minimum": 1
+          }
+        },
+        "required": [
+          "job_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "upload_data",
+      "title": "Upload data",
+      "description": "Upload CSV or JSON data into a Signaliz workspace list for processing. Accepts inline data, public CSV URLs, Google Sheets, or Google Drive links.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "string"
+          },
+          "source_url": {
+            "type": "string",
+            "format": "uri"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "csv",
+              "json"
+            ]
+          },
+          "list_name": {
+            "type": "string"
+          },
+          "list_id": {
+            "type": "string"
+          },
+          "replace": {
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      }
+    },
+    {
+      "name": "create_system",
+      "title": "Create automation system",
+      "description": "Create a saved Signaliz automation pipeline from ordered capabilities, optional field mappings, contracts, and node-specific configuration.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "description": {
+            "type": "string"
+          },
+          "capabilities": {
+            "type": "array",
+            "minItems": 2,
+            "items": {
+              "type": "string"
+            }
+          },
+          "field_mappings": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "contract": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "node_configs": {
+            "type": "object",
+            "additionalProperties": true
+          },
+          "is_active": {
+            "type": "boolean",
+            "default": true
+          }
+        },
+        "required": [
+          "name",
+          "capabilities"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false
+      }
+    },
+    {
+      "name": "run_system",
+      "title": "Run automation system",
+      "description": "Execute a saved Signaliz automation pipeline using inline data, a saved list, the latest workspace list, or a previous run's data.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "system_id": {
+            "type": "string"
+          },
+          "system_name": {
+            "type": "string"
+          },
+          "input_data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "list_id": {
+            "type": "string"
+          },
+          "use_workspace_list": {
+            "type": "boolean"
+          },
+          "rerun_last": {
+            "type": "boolean"
+          },
+          "list_limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 1000,
+            "default": 100
+          },
+          "wait_for_completion": {
+            "type": "boolean",
+            "default": false
+          },
+          "config": {
+            "type": "object",
+            "additionalProperties": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "manage_blocklist",
+      "title": "Manage blocklists",
+      "description": "Create, delete, list, retrieve, add, or remove suppression, do-not-contact, bounce, competitor, or custom blocklist entries.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "create",
+              "delete",
+              "add_entries",
+              "remove_entries",
+              "list",
+              "get"
+            ]
+          },
+          "list_type": {
+            "type": "string",
+            "enum": [
+              "suppression",
+              "dnc",
+              "bounce",
+              "competitor",
+              "custom"
+            ]
+          },
+          "entry_type": {
+            "type": "string",
+            "enum": [
+              "email",
+              "domain",
+              "company",
+              "phone",
+              "linkedin_url"
+            ]
+          },
+          "value": {
+            "type": "string"
+          },
+          "entries": {
+            "type": "array",
+            "maxItems": 1000,
+            "items": {
+              "type": "object",
+              "properties": {
+                "value": {
+                  "type": "string"
+                },
+                "entry_type": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "value"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "entry_id": {
+            "type": "string"
+          },
+          "source_tool": {
+            "type": "string"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500,
+            "default": 50
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "default": 0
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false
+      }
+    }
+  ]
+}

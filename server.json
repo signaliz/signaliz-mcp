@@ -1,0 +1,61 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.signaliz/signaliz-mcp",
+  "title": "Signaliz",
+  "description": "B2B email verification, company signal enrichment, and governed GTM data pipelines.",
+  "version": "2.0.0",
+  "websiteUrl": "https://signaliz.com",
+  "repository": {
+    "url": "https://github.com/signaliz/signaliz-mcp",
+    "source": "github"
+  },
+  "icons": [
+    {
+      "src": "https://signaliz.com/lovable-uploads/b3949cbc-6438-4a0a-aa09-b5e08d3b1ded.png",
+      "mimeType": "image/png",
+      "sizes": [
+        "any"
+      ]
+    }
+  ],
+  "remotes": [
+    {
+      "type": "streamable-http",
+      "url": "https://api.signaliz.com/functions/v1/signaliz-mcp",
+      "headers": [
+        {
+          "name": "Authorization",
+          "description": "Signaliz API key as a Bearer token. Create one from Settings > Developer > API Access in Signaliz.",
+          "isRequired": true,
+          "isSecret": true,
+          "value": "Bearer {signaliz_api_key}",
+          "variables": {
+            "signaliz_api_key": {
+              "description": "Signaliz API key.",
+              "isRequired": true,
+              "isSecret": true,
+              "placeholder": "sk_your_key_here"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "_meta": {
+    "io.modelcontextprotocol.registry/publisher-provided": {
+      "categories": [
+        "sales",
+        "go-to-market",
+        "data-enrichment",
+        "email-verification",
+        "data-quality",
+        "automation"
+      ],
+      "auth": {
+        "type": "api_key_or_oauth",
+        "oauthProtectedResource": "https://api.signaliz.com/functions/v1/signaliz-mcp/.well-known/oauth-protected-resource"
+      },
+      "toolSchema": "https://github.com/signaliz/signaliz-mcp/blob/main/tools/tools.json"
+    }
+  }
+}

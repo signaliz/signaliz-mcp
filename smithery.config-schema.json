@@ -1,0 +1,20 @@
+{
+  "type": "object",
+  "properties": {
+    "signalizApiKey": {
+      "type": "string",
+      "title": "Signaliz API key",
+      "description": "Create a Signaliz API key from Settings > Developer > API Access.",
+      "x-from": {
+        "header": "signaliz-api-key"
+      },
+      "x-to": {
+        "query": "api_key"
+      }
+    }
+  },
+  "required": [
+    "signalizApiKey"
+  ],
+  "additionalProperties": false
+}
