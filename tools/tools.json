@@ -4,326 +4,893 @@
     "name": "Signaliz",
     "mcpName": "io.github.signaliz/signaliz-mcp",
     "endpoint": "https://api.signaliz.com/functions/v1/signaliz-mcp",
-    "transport": "streamable-http"
+    "transport": "streamable-http",
+    "npmPackage": "@signaliz/mcp-server",
+    "version": "2.0.1"
+  },
+  "generatedFrom": {
+    "package": "@signaliz/mcp-server",
+    "version": "2.0.1",
+    "command": "tools/list"
   },
   "tools": [
     {
-      "name": "list_capabilities",
-      "title": "List Signaliz capabilities",
-      "description": "List capabilities available in the Signaliz system builder, organized by INGEST, PREPARE, ENRICH, LOGIC, ACT, and OUTPUT categories.",
+      "name": "enrich_company_signals",
+      "title": "Enrich Company Signals",
+      "category": "enrichment",
+      "description": "Discover recent, actionable signals about a company using AI-powered research. Returns hiring, funding, product launches, partnerships, and other business developments with confidence scores and sources.",
       "inputSchema": {
         "type": "object",
-        "properties": {},
-        "additionalProperties": false
+        "properties": {
+          "company_name": {
+            "type": "string",
+            "description": "Company name (e.g., \"Stripe\", \"OpenAI\")"
+          },
+          "domain": {
+            "type": "string",
+            "description": "Company website domain (e.g., \"stripe.com\")"
+          },
+          "research_prompt": {
+            "type": "string",
+            "description": "What signals to find (e.g., \"Find recent hiring and funding activities\")"
+          },
+          "signal_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter by signal types: hiring, funding, product_launch, partnership, expansion, leadership_change, award, compliance, pricing_change, acquisition"
+          },
+          "target_signal_count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 50,
+            "default": 3,
+            "description": "Number of signals to return (1-50, default: 3)"
+          },
+          "lookback_days": {
+            "type": "integer",
+            "minimum": 7,
+            "maximum": 365,
+            "default": 90,
+            "description": "How many days back to search (7-365, default: 90)"
+          },
+          "enable_deep_search": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable real-time web search for latest data (higher cost)"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "research_prompt"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
       },
       "annotations": {
-        "readOnlyHint": true,
+        "readOnlyHint": false,
         "destructiveHint": false,
-        "idempotentHint": true
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "find_contacts_with_email",
+      "title": "Find Contacts With Email",
+      "category": "enrichment",
+      "description": "Find contacts at a company with verified email addresses. Uses AI to interpret persona descriptions and returns contacts with verified, deliverable emails.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "company_name": {
+            "type": "string",
+            "description": "Company name to search"
+          },
+          "company_domain": {
+            "type": "string",
+            "description": "Company website domain (e.g., \"stripe.com\")"
+          },
+          "persona": {
+            "type": "string",
+            "description": "Target persona (e.g., \"VP of Engineering\", \"Head of Sales\", \"C-level executives\")"
+          },
+          "target_count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10,
+            "default": 3,
+            "description": "Number of contacts to find (1-10, default: 3)"
+          },
+          "linkedin_url": {
+            "type": "string",
+            "description": "Company LinkedIn URL for better contact discovery"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "company_name",
+          "company_domain",
+          "persona"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
       }
     },
     {
       "name": "find_emails_with_verification",
-      "title": "Find and verify one email",
-      "description": "Find a professional email address for one contact from a name and company domain, then verify deliverability. For batches, use find_and_verify_emails.",
+      "title": "Find Emails With Verification",
+      "category": "enrichment",
+      "description": "Find and verify work email for a specific person. Provide full_name or first_name + last_name with company_domain. Returns verified email with deliverability status.",
       "inputSchema": {
         "type": "object",
         "properties": {
-          "company_domain": {
+          "full_name": {
             "type": "string",
-            "description": "Company website domain, for example stripe.com."
-          },
-          "company_name": {
-            "type": "string",
-            "description": "Optional company name for disambiguation."
+            "description": "Full name (e.g., \"John Smith\"). Alternative to first_name + last_name."
           },
           "first_name": {
             "type": "string",
-            "description": "First name. Use with last_name as an alternative to full_name."
+            "description": "First name (use with last_name)"
           },
           "last_name": {
             "type": "string",
-            "description": "Last name. Use with first_name as an alternative to full_name."
+            "description": "Last name (use with first_name)"
           },
-          "full_name": {
+          "company_domain": {
             "type": "string",
-            "description": "Full name, for example John Smith."
+            "description": "Company website domain (e.g., \"stripe.com\")"
           },
           "linkedin_url": {
             "type": "string",
-            "format": "uri",
-            "description": "Optional LinkedIn profile URL."
+            "description": "LinkedIn profile URL (improves accuracy)"
+          },
+          "company_name": {
+            "type": "string",
+            "description": "Company name (helps with disambiguation)"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
           }
         },
         "required": [
           "company_domain"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
       },
       "annotations": {
-        "readOnlyHint": true,
+        "readOnlyHint": false,
         "destructiveHint": false,
-        "idempotentHint": true,
-        "openWorldHint": true
-      }
-    },
-    {
-      "name": "find_and_verify_emails",
-      "title": "Find and verify emails in batch",
-      "description": "Submit up to 5,000 contacts for asynchronous professional email finding and deliverability verification. Returns a job_id for check_job_status.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "contacts": {
-            "type": "array",
-            "minItems": 1,
-            "maxItems": 5000,
-            "items": {
-              "type": "object",
-              "properties": {
-                "company_domain": {
-                  "type": "string"
-                },
-                "company_name": {
-                  "type": "string"
-                },
-                "first_name": {
-                  "type": "string"
-                },
-                "last_name": {
-                  "type": "string"
-                },
-                "full_name": {
-                  "type": "string"
-                },
-                "linkedin_url": {
-                  "type": "string"
-                }
-              },
-              "additionalProperties": true
-            }
-          }
-        },
-        "required": [
-          "contacts"
-        ],
-        "additionalProperties": false
-      },
-      "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
+        "idempotentHint": false,
         "openWorldHint": true
       }
     },
     {
       "name": "verify_email",
-      "title": "Verify one email",
-      "description": "Verify one email address for deliverability. For multiple emails, use verify_emails.",
+      "title": "Verify Email",
+      "category": "enrichment",
+      "description": "⚠️ SINGLE EMAIL ONLY. Verifies ONE email address at a time. For verifying multiple emails, ALWAYS use execute_primitive with capability_id='verify_emails' instead — it accepts up to 25 emails in one call and is 10x faster. Never call this tool in a loop. Only use this when you have exactly one email to verify.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "email": {
             "type": "string",
-            "format": "email",
-            "description": "Email address to verify."
+            "description": "Email address to verify"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
           }
         },
         "required": [
           "email"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
       },
       "annotations": {
-        "readOnlyHint": true,
+        "readOnlyHint": false,
         "destructiveHint": false,
-        "idempotentHint": true
+        "idempotentHint": true,
+        "openWorldHint": false
       }
     },
     {
-      "name": "verify_emails",
-      "title": "Verify emails in batch",
-      "description": "Submit up to 5,000 email addresses for asynchronous deliverability verification. Returns a job_id for check_job_status.",
+      "name": "generic_http_request",
+      "title": "Generic Http Request",
+      "category": "enrichment",
+      "description": "Execute a custom HTTP request against any external API through Signaliz. Supports all HTTP methods, custom headers, body templates with {{variable}} placeholders, and response field extraction via JSON path. Cost: compute only (Trigger.dev cost × 5). For batch processing multiple records, use execute_primitive with capability_id='generic_http_request'.",
       "inputSchema": {
         "type": "object",
         "properties": {
-          "emails": {
-            "type": "array",
-            "minItems": 1,
-            "maxItems": 5000,
-            "items": {
-              "oneOf": [
-                {
-                  "type": "string",
-                  "format": "email"
-                },
-                {
-                  "type": "object",
-                  "properties": {
-                    "email": {
-                      "type": "string",
-                      "format": "email"
-                    }
-                  },
-                  "required": [
-                    "email"
-                  ],
-                  "additionalProperties": true
-                }
-              ]
-            }
+          "url": {
+            "type": "string",
+            "description": "Target URL. Supports {{variable}} placeholders."
           },
-          "config": {
+          "method": {
+            "type": "string",
+            "enum": [
+              "GET",
+              "POST",
+              "PUT",
+              "PATCH",
+              "DELETE"
+            ],
+            "default": "POST",
+            "description": "HTTP method (default: POST)"
+          },
+          "headers": {
             "type": "object",
-            "properties": {
-              "skip_catch_all_verification": {
-                "type": "boolean",
-                "description": "Skip catch-all domain checking for faster but less complete verification."
-              }
+            "additionalProperties": {
+              "type": "string"
             },
-            "additionalProperties": false
+            "description": "Request headers as key-value pairs (e.g., {\"Authorization\": \"Bearer sk_...\"})"
+          },
+          "body": {
+            "description": "Request body — string or JSON object. Supports {{variable}} placeholders."
+          },
+          "auth_type": {
+            "type": "string",
+            "enum": [
+              "none",
+              "bearer",
+              "api_key",
+              "basic"
+            ],
+            "description": "Authentication type (default: none)"
+          },
+          "auth_value": {
+            "type": "string",
+            "description": "Auth token, API key, or base64-encoded credentials"
+          },
+          "timeout_ms": {
+            "type": "integer",
+            "minimum": 1000,
+            "maximum": 60000,
+            "description": "Request timeout in ms (default: 30000, max: 60000)"
+          },
+          "response_path": {
+            "type": "string",
+            "description": "JSON path to extract from response (e.g., \"data.results[0].email\")"
+          },
+          "variables": {
+            "type": "object",
+            "additionalProperties": {
+              "type": "string"
+            },
+            "description": "Variable values to substitute into URL, headers, and body templates"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
           }
         },
         "required": [
-          "emails"
+          "url"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
       },
       "annotations": {
-        "readOnlyHint": true,
+        "readOnlyHint": false,
         "destructiveHint": false,
-        "idempotentHint": true
-      }
-    },
-    {
-      "name": "enrich_company_signals",
-      "title": "Enrich company signals",
-      "description": "Discover structured business signals and intelligence for companies, including hiring, funding, product launches, partnerships, leadership changes, expansion, acquisitions, awards, regulatory events, and earnings.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "companies": {
-            "type": "array",
-            "minItems": 1,
-            "maxItems": 5000,
-            "items": {
-              "type": "object",
-              "properties": {
-                "domain": {
-                  "type": "string"
-                },
-                "company_name": {
-                  "type": "string"
-                }
-              },
-              "additionalProperties": true
-            }
-          },
-          "domain": {
-            "type": "string",
-            "description": "Single-company mode domain."
-          },
-          "company_domain": {
-            "type": "string",
-            "description": "Alias for domain in single-company mode."
-          },
-          "company_name": {
-            "type": "string",
-            "description": "Single-company mode company name."
-          },
-          "signal_types": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "enum": [
-                "hiring",
-                "funding",
-                "product_launch",
-                "partnership",
-                "leadership_change",
-                "expansion",
-                "acquisition",
-                "award",
-                "regulatory",
-                "earnings"
-              ]
-            }
-          },
-          "lookback_days": {
-            "type": "integer",
-            "minimum": 1,
-            "default": 90
-          },
-          "enable_deep_search": {
-            "type": "boolean"
-          },
-          "research_prompt": {
-            "type": "string"
-          },
-          "model": {
-            "type": "string"
-          },
-          "config": {
-            "type": "object",
-            "additionalProperties": true
-          }
-        },
-        "additionalProperties": false
-      },
-      "annotations": {
-        "readOnlyHint": true,
-        "destructiveHint": false,
-        "idempotentHint": true,
+        "idempotentHint": false,
         "openWorldHint": true
       }
     },
     {
       "name": "execute_primitive",
-      "title": "Execute primitive capability",
-      "description": "Run a small synchronous job for ad-hoc email finding, email verification, company signal enrichment, custom AI prompts, data cleaning, or generic HTTP requests. Use dedicated batch tools or create_system plus run_system for larger jobs.",
+      "title": "Execute Primitive",
+      "category": "enrichment",
+      "description": "✅ PREFERRED batch enrichment tool. Directly execute a single enrichment capability on up to 25 records in one call. For email verification, use capability_id='verify_emails' with an array of {email} records — this is 10x faster than calling verify_email in a loop. For single HTTP requests, use generic_http_request instead. Supported capability_id values: verify_emails, find_verified_emails, enrich_company_signals, custom_ai_prompt, generic_http_request.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "capability_id": {
             "type": "string",
-            "enum": [
-              "custom_ai_prompt",
-              "find_verified_emails",
-              "verify_emails",
-              "enrich_company_signals",
-              "generic_http_request",
-              "ai_clean"
-            ]
+            "description": "Capability to run. Options: verify_emails (batch email verification, up to 25), find_verified_emails (find + verify emails), enrich_company_signals (company research), custom_ai_prompt (AI scoring/research), generic_http_request (call any API)"
           },
           "input_data": {
             "type": "array",
-            "minItems": 1,
-            "maxItems": 100,
             "items": {
               "type": "object",
-              "additionalProperties": true
-            }
+              "additionalProperties": {}
+            },
+            "description": "Array of input records (max 25). For verify_emails: [{email: 'alice@acme.com'}, ...]. For find_verified_emails: [{first_name, last_name, company_domain}, ...]."
           },
           "config": {
             "type": "object",
-            "additionalProperties": true
+            "additionalProperties": {},
+            "description": "Capability-specific config. Required for custom_ai_prompt: {system_prompt, user_template}."
           },
           "field_mappings": {
             "type": "object",
             "additionalProperties": {
               "type": "string"
-            }
+            },
+            "description": "Map your field names to capability field names. E.g., {website: 'company_domain'}."
           },
-          "force_fulfillment": {
-            "type": "boolean",
-            "default": false
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
           }
         },
         "required": [
           "capability_id",
           "input_data"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "custom_ai_prompt",
+      "title": "Custom Ai Prompt",
+      "category": "enrichment",
+      "description": "Run a custom AI prompt on data records with model selection, structured output, and optional Signaliz AI Search (Exa) research enhancement. Submit up to 5,000 records and get a job_id back immediately. Poll check_job_status to get results. Use {{field_name}} placeholders in your prompt template to reference data columns. Great for scoring, classification, summarization, content generation, and any custom AI task on your data.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "records": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "description": "Array of data records. Each record is a key-value object. Fields can be referenced in the prompt as {{field_name}}. Example: [{\"company\": \"Stripe\", \"domain\": \"stripe.com\"}, {\"company\": \"OpenAI\", \"domain\": \"openai.com\"}]"
+          },
+          "system_prompt": {
+            "type": "string",
+            "description": "System instructions for the AI (e.g., \"You are a company analyst scoring SaaS fit\")"
+          },
+          "user_template": {
+            "type": "string",
+            "description": "Prompt template with {{field_name}} placeholders. Example: \"Analyze {{company}} ({{domain}}) for enterprise readiness\""
+          },
+          "model": {
+            "type": "string",
+            "default": "google/gemini-2.5-flash",
+            "description": "AI model: google/gemini-2.5-flash (default), google/gemini-2.5-pro, openai/gpt-4o, openai/gpt-4o-mini, anthropic/claude-sonnet-4, anthropic/claude-3.5-haiku, meta-llama/llama-3.3-70b-instruct, inception/mercury-2"
+          },
+          "temperature": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "default": 0.3,
+            "description": "Creativity level (0=deterministic, 1=creative, default: 0.3)"
+          },
+          "output_fields": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "description": "Field name (e.g., \"score\")"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Type: text, number, boolean"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "What the AI should put in this field"
+                }
+              },
+              "required": [
+                "name",
+                "type",
+                "description"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Structured output fields. If provided, AI returns JSON with these exact fields. Example: [{name: \"score\", type: \"number\", description: \"SaaS fit 1-100\"}]"
+          },
+          "enable_exa_search": {
+            "type": "boolean",
+            "default": false,
+            "description": "Enable Signaliz AI Search (Exa neural search) to gather web research context before each prompt. Costs 1 extra credit per record."
+          },
+          "exa_num_results": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 5,
+            "description": "Number of Exa search results per record (1-20, default: 5)"
+          },
+          "callback_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional webhook URL. When provided, Signaliz POSTs { job_id, status, item_count, summary, results_url } on completion or failure (3 attempts, exponential backoff: 1s, 5s, 30s)."
+          },
+          "callback_secret": {
+            "type": "string",
+            "minLength": 8,
+            "description": "Optional shared secret. When provided, the callback payload is signed with HMAC-SHA256 and the signature is sent in the X-Signaliz-Signature header (format: 'sha256=<hex>')."
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "records",
+          "system_prompt",
+          "user_template"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "find_and_verify_emails",
+      "title": "Find And Verify Emails",
+      "category": "batch",
+      "description": "🔥 BATCH: Find and verify work emails for up to 5,000 contacts in one call. Returns a job_id immediately — use check_job_status to poll for results. Each contact needs: first_name + last_name + company_domain, OR full_name + company_domain, OR linkedin_url.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "contacts": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "description": "Array of contacts (max 5000). Each: {first_name, last_name, company_domain} or {full_name, company_domain} or {linkedin_url}"
+          },
+          "callback_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional webhook URL. When provided, Signaliz POSTs { job_id, status, item_count, summary, results_url } on completion or failure (3 attempts, exponential backoff: 1s, 5s, 30s)."
+          },
+          "callback_secret": {
+            "type": "string",
+            "minLength": 8,
+            "description": "Optional shared secret. When provided, the callback payload is signed with HMAC-SHA256 and the signature is sent in the X-Signaliz-Signature header (format: 'sha256=<hex>')."
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "contacts"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "verify_emails",
+      "title": "Verify Emails",
+      "category": "batch",
+      "description": "🔥 BATCH: Verify up to 5,000 email addresses in one call. Returns a job_id immediately — use check_job_status to poll for results.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "emails": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "description": "Array of emails (max 5000). Each: {email: 'user@example.com'}"
+          },
+          "skip_catch_all_verification": {
+            "type": "boolean",
+            "description": "Skip catch-all verification (default: false)"
+          },
+          "callback_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional webhook URL. When provided, Signaliz POSTs { job_id, status, item_count, summary, results_url } on completion or failure (3 attempts, exponential backoff: 1s, 5s, 30s)."
+          },
+          "callback_secret": {
+            "type": "string",
+            "minLength": 8,
+            "description": "Optional shared secret. When provided, the callback payload is signed with HMAC-SHA256 and the signature is sent in the X-Signaliz-Signature header (format: 'sha256=<hex>')."
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "emails"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "enrich_company_signals_batch",
+      "title": "Enrich Company Signals Batch",
+      "category": "batch",
+      "description": "🔥 BATCH: Enrich signals for up to 5,000 companies in one call. Returns a job_id immediately — use check_job_status to poll for results.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "companies": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "description": "Array of companies (max 5000). Each: {company_name, domain} or {company_name}"
+          },
+          "research_prompt": {
+            "type": "string",
+            "description": "What signals to find"
+          },
+          "signal_types": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Filter by signal types"
+          },
+          "lookback_days": {
+            "type": "number",
+            "description": "How many days back to search (default: 90)"
+          },
+          "target_signal_count": {
+            "type": "number",
+            "description": "Signals per company (default: 5)"
+          },
+          "callback_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional webhook URL. When provided, Signaliz POSTs { job_id, status, item_count, summary, results_url } on completion or failure (3 attempts, exponential backoff: 1s, 5s, 30s)."
+          },
+          "callback_secret": {
+            "type": "string",
+            "minLength": 8,
+            "description": "Optional shared secret. When provided, the callback payload is signed with HMAC-SHA256 and the signature is sent in the X-Signaliz-Signature header (format: 'sha256=<hex>')."
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "companies"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "batch_http_request",
+      "title": "Batch Http Request",
+      "category": "batch",
+      "description": "🔥 BATCH: Execute up to 5,000 HTTP requests in one call. Returns a job_id immediately — use check_job_status to poll for results. Each request needs at least a url field. Supports {{variable}} placeholders for per-record substitution.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "requests": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "description": "Array of HTTP requests (max 5000). Each: {url, method?, headers?, body?, auth_type?, auth_value?}"
+          },
+          "callback_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Optional webhook URL. When provided, Signaliz POSTs { job_id, status, item_count, summary, results_url } on completion or failure (3 attempts, exponential backoff: 1s, 5s, 30s)."
+          },
+          "callback_secret": {
+            "type": "string",
+            "minLength": 8,
+            "description": "Optional shared secret. When provided, the callback payload is signed with HMAC-SHA256 and the signature is sent in the X-Signaliz-Signature header (format: 'sha256=<hex>')."
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "requests"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "generate_leads",
+      "title": "Generate Leads",
+      "category": "lead-discovery",
+      "description": "[BETA] Find B2B professionals by role, industry, company size, and location. Returns PEOPLE + COMPANIES + VERIFIED EMAILS in one run. 1 credit per verified lead returned.\n\n⚡ SMART ROUTING — IMPORTANT: When a user asks to \"find people\", \"find companies\", or \"find leads\", choose the included discovery lane unless they explicitly need verified emails:\n\nOPTION A — Lead Generation (generate_leads): 1 credit/row\n  ✅ Returns people WITH verified emails + company data\n  ✅ Best when the user needs contact-ready leads for outreach\n  ✅ Includes deduplication and email verification\n\nOPTION B — Find People (find_people_blitz) or Find Companies (find_companies_blitz): included standard discovery\n  ✅ No Signaliz fresh enrichment credits for standard people/company discovery\n  ✅ Best when the user just needs names/titles/companies (no verified emails needed)\n  ❌ Does NOT include verified emails\n\nAsk the user: \"I can run this two ways:\n1. **Lead Generation** (1 credit/row) — returns people + companies + verified emails, ready for outreach\n2. **Find People / Find Companies** (included standard discovery) — returns contact or company data only, no verified emails\n\nWhich would you prefer?\"\n\nOnly proceed after the user chooses. Default to Lead Generation if the user says \"find me leads\" or implies they need emails.\n\nBEFORE RUNNING: Tell the user the estimated credit cost based on max_leads and ask for confirmation.\n\nSEARCH PARAMETERS (all optional, AI parses from prompt):\n- contact_job_title: Job titles to include (e.g. [\"CEO\", \"CTO\"])\n- contact_not_job_title: Job titles to exclude\n- seniority_level: \"founder\",\"owner\",\"c_suite\",\"director\",\"partner\",\"vp\",\"head\",\"manager\",\"senior\",\"entry\",\"trainee\"\n- functional_level: \"c_suite\",\"finance\",\"product_management\",\"engineering\",\"design\",\"education\",\"human_resources\",\"information_technology\",\"legal\",\"marketing\",\"operations\",\"sales\",\"support\"\n- contact_location: Region/country/state lowercase (e.g. [\"united states\",\"california, us\"])\n- contact_city: City-level targeting (e.g. [\"austin\",\"san francisco\"])\n- contact_not_location / contact_not_city: Exclusion filters\n- email_status: \"validated\",\"not_validated\",\"unknown\" (default: [\"validated\"])\n- company_domain: Specific domains (e.g. [\"google.com\"])\n- size: Employee count buckets: \"0-1\",\"2-10\",\"11-20\",\"21-50\",\"51-100\",\"101-200\",\"201-500\",\"501-1000\",\"1001-2000\",\"2001-5000\",\"10000+\"\n- company_industry / company_not_industry: Industry filters\n- company_keywords / company_not_keywords: Keyword filters\n- min_revenue / max_revenue: Revenue bands: \"100K\",\"500K\",\"1M\",\"5M\",\"10M\",\"25M\",\"50M\",\"100M\",\"500M\",\"1B\",\"5B\",\"10B\"\n- funding: \"Seed\",\"Angel\",\"Series A\",\"Series B\",\"Series C\",\"Series D\",\"Series E\",\"Series F\",\"Venture\",\"Debt\",\"Convertible\",\"PE\",\"Other\"\n\n⚠️ TARGETING SPECIFIC COMPANIES — When the user wants leads at a SPECIFIC SET of companies (e.g. \"find CEOs at acme.com, foo.com, bar.com\" or \"VPs at Stripe and Plaid\"), you MUST pass the list via the dedicated \"company_domains\" parameter. Do NOT rely on the prompt-parser to pick them up — pass them explicitly. Use root domains only (acme.com, not www.acme.com/about).\n\nSubmit a job and get a job_id back immediately — poll check_job_status for results.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "Natural language description of leads. Be specific about titles, industries, company sizes, locations."
+          },
+          "company_domains": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "PREFERRED when targeting a specific set of companies. Pass root domains (e.g. [\"stripe.com\",\"plaid.com\"]) to restrict the search to those companies only. Use this whenever the user names specific companies — never embed them only in the prompt text."
+          },
+          "max_leads": {
+            "type": "number",
+            "default": 100,
+            "description": "Maximum leads to return (default: 100, max: 5000)"
+          },
+          "verify_emails": {
+            "type": "boolean",
+            "default": true,
+            "description": "Verify emails for each lead (default: true). Set false for faster results."
+          },
+          "file_name": {
+            "type": "string",
+            "description": "Custom label for this run (e.g. \"Q2 SaaS Outreach\")"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "prompt"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "generate_local_leads",
+      "title": "Generate Local Leads",
+      "category": "lead-discovery",
+      "description": "[BETA] Find local businesses and their VERIFIED contact emails via Google Maps. Best for small/local businesses, brick-and-mortar, service providers, restaurants, clinics, contractors, agencies.\n\nThe `target_verified` parameter is the number of verified, deliverable, non-catch-all leads to return — NOT the number of places searched. Signaliz will continue scraping additional businesses in the area until the target is met or the safety cap (5× target, max 5,000) is reached.\n\nReturns business data (name, address, phone, website, ratings, reviews) plus verified emails only. Catch-all, unverifiable, placeholder, and malformed emails are filtered out before return.\n\nBEFORE RUNNING: Tell the user the estimated credit cost (1 credit per verified email returned; the safety cap means worst-case credit cost is bounded at target_verified × 1, not 5×) and ask for confirmation. Submit a job and get a job_id back immediately — poll check_job_status for results.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "Business type + location, e.g. 'lawyers in Phoenix, AZ'"
+          },
+          "target_verified": {
+            "type": "number",
+            "default": 100,
+            "description": "Verified leads to return (default: 100). NOT places searched — Signaliz auto-continues until target met or area exhausted."
+          },
+          "max_leads": {
+            "type": "number",
+            "description": "[DEPRECATED] Use target_verified instead. Kept for backward compatibility."
+          },
+          "verify_emails": {
+            "type": "boolean",
+            "default": true,
+            "description": "Verify emails for each lead (default: true). Set false for faster results."
+          },
+          "file_name": {
+            "type": "string",
+            "description": "Custom label for this run"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "prompt"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "find_people_blitz",
+      "title": "Find People Blitz",
+      "category": "lead-discovery",
+      "description": "🔍 DISCOVERY TOOL — Find B2B Professionals (Data Only, No Emails)\n\nReturns: Names, job titles, companies, LinkedIn URLs, locations.\nCost: included standard discovery. Fresh verified email discovery uses fresh enrichment credits.\nDoes NOT include: Verified emails, phone numbers.\n\nWHEN TO USE THIS vs generate_leads:\n┌──────────────────────┬────────────────────────┬───────────────────────────┐\n│                      │ find_people_blitz      │ generate_leads            │\n├──────────────────────┼────────────────────────┼───────────────────────────┤\n│ Returns              │ People data only       │ People + Verified Emails  │\n│ Cost                 │ Included standard      │ 1 credit/lead             │\n│ Best for             │ Research, list building │ Outreach-ready leads      │\n│ Emails included?     │ ❌ No                  │ ✅ Yes (verified)         │\n│ Speed                │ Fast                   │ Slower (email verification)│\n└──────────────────────┴────────────────────────┴───────────────────────────┘\n\nUSE find_people_blitz when: User wants to research professionals, build lists, or doesn't need emails.\nUSE generate_leads when: User wants to send emails, run outreach campaigns, or says \"find leads.\"\n\nRUNNING: Standard people discovery is included and does not require spend approval. Ask for confirmation only if adding verified email discovery or another fresh enrichment step.\n\nSEARCH PARAMETERS (all optional, AI parses from prompt):\n- contact_job_title, seniority_level, functional_level\n- contact_location, contact_city\n- company_domain, size, company_industry\n- min_revenue / max_revenue\n\nSubmit a job and get a job_id back immediately — poll check_job_status for results.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "Describe the people to find. Be specific about titles, industries, company sizes, locations."
+          },
+          "max_leads": {
+            "type": "number",
+            "default": 100,
+            "description": "Maximum people to return (default: 100, max: 5000)"
+          },
+          "file_name": {
+            "type": "string",
+            "description": "Custom label for this run (e.g. \"Q2 Engineering Leaders\")"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "prompt"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": true
+      }
+    },
+    {
+      "name": "find_companies_blitz",
+      "title": "Find Companies Blitz",
+      "category": "lead-discovery",
+      "description": "🔍 DISCOVERY TOOL — Find Companies (Company Data Only, No People)\n\nReturns: Company names, domains, industries, employee counts, locations, revenue.\nCost: included standard discovery. Fresh premium enrichment uses fresh enrichment credits.\nDoes NOT include: People, contacts, or verified emails.\n\nWHEN TO USE THIS vs generate_leads:\n┌──────────────────────┬────────────────────────┬───────────────────────────┐\n│                      │ find_companies_blitz   │ generate_leads            │\n├──────────────────────┼────────────────────────┼───────────────────────────┤\n│ Returns              │ Company data only      │ People + Companies + Emails│\n│ Cost                 │ Included standard      │ 1 credit/lead             │\n│ Best for             │ Market research, TAM   │ Outreach-ready leads      │\n│ People included?     │ ❌ No                  │ ✅ Yes                    │\n│ Emails included?     │ ❌ No                  │ ✅ Yes (verified)         │\n└──────────────────────┴────────────────────────┴───────────────────────────┘\n\nUSE find_companies_blitz when: User wants company data, market sizing, account lists.\nUSE generate_leads when: User wants contacts at companies for outreach.\n\nRUNNING: Standard company discovery is included and does not require spend approval. Ask for confirmation only if adding verified emails or fresh premium enrichment.\n\nSEARCH PARAMETERS (all optional, AI parses from prompt):\n- company_industry, size, company_location\n- min_revenue / max_revenue, funding\n- company_keywords\n\nSubmit a job and get a job_id back immediately — poll check_job_status for results.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "description": "Describe the companies to find. Be specific about industries, sizes, locations."
+          },
+          "max_leads": {
+            "type": "number",
+            "default": 100,
+            "description": "Maximum companies to return (default: 100, max: 5000)"
+          },
+          "file_name": {
+            "type": "string",
+            "description": "Custom label for this run (e.g. \"Series A SaaS Companies\")"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "prompt"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
       },
       "annotations": {
         "readOnlyHint": false,
@@ -334,183 +901,983 @@
     },
     {
       "name": "check_job_status",
-      "title": "Check job status",
-      "description": "Poll async jobs returned by batch tools and retrieve paginated results.",
+      "title": "Check Job Status",
+      "category": "batch",
+      "description": "Check the status of a batch job. Returns progress, results (when complete), and polling guidance. Pass the job_id from find_and_verify_emails, verify_emails, enrich_company_signals_batch, or batch_http_request.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "job_id": {
-            "type": "string"
+            "type": "string",
+            "description": "The job_id returned by a batch tool"
           },
           "page": {
-            "type": "integer",
-            "minimum": 1,
-            "default": 1
+            "type": "number",
+            "description": "Results page number (default: 1)"
           },
           "page_size": {
-            "type": "integer",
-            "minimum": 1,
-            "maximum": 500,
-            "default": 100
-          },
-          "include_errors": {
-            "type": "boolean",
-            "default": true
-          },
-          "include_partial_results": {
-            "type": "boolean",
-            "default": false
+            "type": "number",
+            "description": "Results per page (default: 100, max: 500)"
           },
           "_poll_count": {
-            "type": "integer",
-            "minimum": 1
+            "type": "number",
+            "description": "Increment this each time you poll (for backoff guidance)"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
           }
         },
         "required": [
           "job_id"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
       },
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,
-        "idempotentHint": true
+        "idempotentHint": true,
+        "openWorldHint": false
       }
     },
     {
-      "name": "upload_data",
-      "title": "Upload data",
-      "description": "Upload CSV or JSON data into a Signaliz workspace list for processing. Accepts inline data, public CSV URLs, Google Sheets, or Google Drive links.",
+      "name": "company_intelligence",
+      "title": "Company Intelligence",
+      "category": "enrichment",
+      "description": "Research a company using AI-powered intelligence gathering. Scrapes websites and uses AI to extract insights based on your research prompt.",
       "inputSchema": {
         "type": "object",
         "properties": {
-          "data": {
-            "type": "string"
-          },
-          "source_url": {
+          "company_name": {
             "type": "string",
-            "format": "uri"
+            "description": "Company name for research"
           },
-          "format": {
+          "website_url": {
             "type": "string",
-            "enum": [
-              "csv",
-              "json"
-            ]
+            "description": "Company website URL (e.g., \"https://stripe.com\")"
           },
-          "list_name": {
-            "type": "string"
+          "domain": {
+            "type": "string",
+            "description": "Company domain (e.g., \"stripe.com\")"
           },
-          "list_id": {
-            "type": "string"
+          "linkedin_url": {
+            "type": "string",
+            "description": "Company LinkedIn URL"
           },
-          "replace": {
-            "type": "boolean",
-            "default": false
-          }
-        },
-        "additionalProperties": false
-      },
-      "annotations": {
-        "readOnlyHint": false,
-        "destructiveHint": false,
-        "idempotentHint": false
-      }
-    },
-    {
-      "name": "create_system",
-      "title": "Create automation system",
-      "description": "Create a saved Signaliz automation pipeline from ordered capabilities, optional field mappings, contracts, and node-specific configuration.",
-      "inputSchema": {
-        "type": "object",
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "description": {
-            "type": "string"
-          },
-          "capabilities": {
+          "additional_urls": {
             "type": "array",
-            "minItems": 2,
             "items": {
               "type": "string"
-            }
+            },
+            "description": "Additional URLs to include in research"
           },
-          "field_mappings": {
-            "type": "object",
-            "additionalProperties": true
+          "research_prompt": {
+            "type": "string",
+            "description": "What to research (e.g., \"Find their main products and pricing\", \"Identify decision makers\")"
           },
-          "contract": {
-            "type": "object",
-            "additionalProperties": true
+          "target_insights_count": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20,
+            "default": 5,
+            "description": "Number of insights to generate (1-20, default: 5)"
           },
-          "node_configs": {
-            "type": "object",
-            "additionalProperties": true
-          },
-          "is_active": {
-            "type": "boolean",
-            "default": true
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
           }
         },
         "required": [
-          "name",
-          "capabilities"
+          "company_name",
+          "research_prompt"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
       },
       "annotations": {
-        "readOnlyHint": false,
+        "readOnlyHint": true,
         "destructiveHint": false,
-        "idempotentHint": false
+        "idempotentHint": true,
+        "openWorldHint": true
       }
     },
     {
-      "name": "run_system",
-      "title": "Run automation system",
-      "description": "Execute a saved Signaliz automation pipeline using inline data, a saved list, the latest workspace list, or a previous run's data.",
+      "name": "list_systems",
+      "title": "List Systems",
+      "category": "systems",
+      "description": "List all automation systems (pipelines) in your Signaliz workspace. Returns system names, descriptions, and IDs that can be run with run_system.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "include_inactive": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include inactive/draft systems"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_system",
+      "title": "Get System",
+      "category": "systems",
+      "description": "Get detailed info about a specific automation system including phases, required inputs, and config.",
       "inputSchema": {
         "type": "object",
         "properties": {
           "system_id": {
-            "type": "string"
+            "type": "string",
+            "description": "System UUID"
           },
           "system_name": {
-            "type": "string"
+            "type": "string",
+            "description": "System name (alternative to system_id)"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "run_system",
+      "title": "Run System",
+      "category": "systems",
+      "description": "Execute a Signaliz automation system. Provide input_data (array of objects), list_id (use a saved list), or set use_workspace_list=true. Returns results directly for MCP-output systems, or a run_id for polling.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "system_id": {
+            "type": "string",
+            "description": "System UUID to run"
+          },
+          "system_name": {
+            "type": "string",
+            "description": "System name (alternative to system_id)"
           },
           "input_data": {
             "type": "array",
             "items": {
               "type": "object",
-              "additionalProperties": true
-            }
+              "additionalProperties": {}
+            },
+            "description": "Array of data objects to process"
           },
           "list_id": {
-            "type": "string"
+            "type": "string",
+            "description": "Use a saved list by ID"
           },
           "use_workspace_list": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Auto-use the most recently updated workspace list"
           },
           "rerun_last": {
-            "type": "boolean"
+            "type": "boolean",
+            "description": "Re-run with data from the last execution"
           },
-          "list_limit": {
+          "row_limit": {
+            "type": "integer",
+            "description": "Max rows to process"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "create_system",
+      "title": "Create System",
+      "category": "systems",
+      "description": "Create a new automation system from a description. Describe what you want (e.g., 'Find SaaS companies, enrich with signals, find decision makers'). AI will design the pipeline with the right capabilities.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "System name"
+          },
+          "description": {
+            "type": "string",
+            "description": "What the system should do"
+          },
+          "input_type": {
+            "type": "string",
+            "description": "Input type: manual_input, mcp_input, find_companies, csv_upload"
+          },
+          "output_type": {
+            "type": "string",
+            "description": "Output type: mcp_output, output_csv, http_request, output_webhook"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "name",
+          "description"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_run",
+      "title": "Get Run",
+      "category": "systems",
+      "description": "Get the status and results of a system run. Use after run_system to check progress or retrieve output.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "run_id": {
+            "type": "string",
+            "description": "Run UUID to check"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "run_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_runs",
+      "title": "List Runs",
+      "category": "systems",
+      "description": "List recent system runs with status, timing, and results summary.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "system_id": {
+            "type": "string",
+            "description": "Filter by system UUID"
+          },
+          "limit": {
             "type": "integer",
             "minimum": 1,
-            "maximum": 1000,
-            "default": 100
+            "maximum": 50,
+            "default": 10,
+            "description": "Number of runs to return"
           },
-          "wait_for_completion": {
-            "type": "boolean",
-            "default": false
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "budget_get_status",
+      "title": "Budget Get Status",
+      "category": "workspace-controls",
+      "description": "Get your workspace credit budget status — current balance, spend rate, limits, and projected runway.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "budget_set_limit",
+      "title": "Budget Set Limit",
+      "category": "workspace-controls",
+      "description": "Set a credit spending limit for your workspace or a specific system. Prevents overspending by blocking runs when the limit is reached.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "daily_limit": {
+            "type": "number",
+            "description": "Max credits per day"
+          },
+          "monthly_limit": {
+            "type": "number",
+            "description": "Max credits per month"
+          },
+          "system_id": {
+            "type": "string",
+            "description": "Apply limit to specific system only"
+          },
+          "alert_threshold": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1,
+            "description": "Alert when usage reaches this percentage (0-1, e.g., 0.8 = 80%)"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "manage_blocklist",
+      "title": "Manage Blocklist",
+      "category": "workspace-controls",
+      "description": "Manage your email/domain blocklist. Add or remove domains and emails that should never be contacted.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "action": {
+            "type": "string",
+            "enum": [
+              "add",
+              "remove",
+              "list"
+            ],
+            "description": "Action to perform"
+          },
+          "entries": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Domains or emails to add/remove (e.g., [\"competitor.com\", \"do-not-email@example.com\"])"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Reason for blocklisting"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "action"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "upload_data",
+      "title": "Upload Data",
+      "category": "systems",
+      "description": "Upload data to your Signaliz workspace for processing. Returns a list_id for use with run_system. Accepts: (1) an array of records in 'data', (2) a publicly accessible CSV URL in 'source_url', (3) a Google Sheets URL in 'source_url' (must be shared as Anyone with the link), or (4) a Google Drive file share URL in 'source_url' or 'google_drive_url' — Signaliz downloads it server-side. NEVER download a Google Drive file yourself and pass raw data; always pass the share URL directly.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": {}
+            },
+            "description": "Array of data objects to upload. Ignored if source_url or google_drive_url is provided."
+          },
+          "source_url": {
+            "type": "string",
+            "description": "URL to a CSV file, Google Sheets, or Google Drive file share link. Server downloads it directly."
+          },
+          "google_drive_url": {
+            "type": "string",
+            "description": "Google Drive share URL (e.g., https://drive.google.com/file/d/FILE_ID/view). Alias for source_url. Do NOT download the file yourself."
+          },
+          "list_name": {
+            "type": "string",
+            "description": "Name for the uploaded list"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_capabilities",
+      "title": "List Capabilities",
+      "category": "systems",
+      "description": "List all available enrichment and processing capabilities in Signaliz. Shows what tools are available for building systems, with input/output schemas and credit costs.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Filter by category: INGEST, ENRICH, ACT"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "write_agent_memory",
+      "title": "Write Agent Memory",
+      "category": "workspace-controls",
+      "description": "Store a memory/note in the Signaliz agent memory system. Memories persist across sessions and can be queried later.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "string",
+            "description": "Memory content to store"
+          },
+          "category": {
+            "type": "string",
+            "description": "Memory category (e.g., preferences, findings, context)"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Tags for retrieval"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "content"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "query_agent_memory",
+      "title": "Query Agent Memory",
+      "category": "workspace-controls",
+      "description": "Search your stored agent memories. Uses semantic search to find relevant past context.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Search query"
+          },
+          "category": {
+            "type": "string",
+            "description": "Filter by category"
+          },
+          "limit": {
+            "type": "integer",
+            "default": 5,
+            "description": "Max results"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_connections",
+      "title": "List Connections",
+      "category": "app-connections",
+      "description": "List all active Airbyte connections in the workspace. Shows connected SaaS apps with their status.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_available_connectors",
+      "title": "List Available Connectors",
+      "category": "app-connections",
+      "description": "List ALL available Airbyte connectors that can be connected. Dynamically fetches from the Airbyte Agent Engine API — currently 48 connectors across CRM, Marketing, Communication, Productivity, Analytics, Development, Support, Finance, HR, E-commerce, Email, and Sales categories. Shows connection status for each.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "category": {
+            "type": "string",
+            "description": "Filter by category: crm, marketing, communication, productivity, analytics, development, support, finance, hr, e-commerce, email, sales"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_connectors",
+      "title": "List Connectors",
+      "category": "app-connections",
+      "description": "List all available connectors/integrations on the platform with their connection status. Legacy alias for list_available_connectors.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "stream_routine_results",
+      "title": "Stream Routine Results",
+      "category": "ops-routines",
+      "description": "Stream the items produced by a running Ops Routine tick in real-time via SSE. Returns an SSE endpoint URL that the agent can connect to with Accept: text/event-stream. Events include: initial_batch, new_item, tick_update, tick_finished, stream_timeout.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tick_id": {
+            "type": "string",
+            "description": "ID of the tick to stream (provide this OR routine_id)"
+          },
+          "routine_id": {
+            "type": "string",
+            "description": "ID of the routine — auto-resolves to the latest active tick"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "chain_routines",
+      "title": "Chain Routines",
+      "category": "ops-routines",
+      "description": "Chain two Ops Routines into a DAG pipeline. The output of the upstream routine automatically feeds into the downstream routine as seed items on every tick. Example: Op A finds companies → chain → Op B finds people at those companies.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "upstream_routine_id": {
+            "type": "string",
+            "description": "ID of the routine that produces data (runs first)"
+          },
+          "downstream_routine_id": {
+            "type": "string",
+            "description": "ID of the routine that consumes data (runs after)"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "upstream_routine_id",
+          "downstream_routine_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_chain_status",
+      "title": "Get Chain Status",
+      "category": "ops-routines",
+      "description": "Get the status of a chained routine execution. Shows the upstream tick, downstream tick(s) it triggered, and per-stage item counts.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "routine_id": {
+            "type": "string",
+            "description": "ID of the upstream routine in the chain"
+          },
+          "tick_id": {
+            "type": "string",
+            "description": "Specific upstream tick to check (defaults to latest)"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "routine_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "connect_app",
+      "title": "Connect App",
+      "category": "app-connections",
+      "description": "Connect a SaaS app to the workspace. Returns instructions to use the Signaliz UI for authentication.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "connector_id": {
+            "type": "string",
+            "description": "ID of the app to connect (e.g., hubspot, salesforce, slack, stripe, shopify, etc.)"
           },
           "config": {
             "type": "object",
-            "additionalProperties": true
+            "additionalProperties": {},
+            "description": "Optional connection config"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
           }
         },
-        "additionalProperties": false
+        "required": [
+          "connector_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "discover_actions",
+      "title": "Discover Actions",
+      "category": "app-connections",
+      "description": "List available entities and actions for a connected app. For example, HubSpot might have contacts.list, deals.create, companies.get, etc.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "connector_id": {
+            "type": "string",
+            "description": "ID of the connected app (get from list_connections)"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "connector_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "execute_connection_action",
+      "title": "Execute Connection Action",
+      "category": "app-connections",
+      "description": "Execute an action on a connected Airbyte app. Read data (list contacts, get deals) or write data (create records, send messages). The app must be connected first.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "connector_id": {
+            "type": "string",
+            "description": "ID of the connected app"
+          },
+          "entity": {
+            "type": "string",
+            "description": "Entity type (e.g., contacts, deals, messages, issues)"
+          },
+          "action": {
+            "type": "string",
+            "description": "Action to perform (e.g., list, get, create, update, delete, search)"
+          },
+          "params": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Action parameters (filters, record data, pagination)"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "connector_id",
+          "entity",
+          "action"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
       },
       "annotations": {
         "readOnlyHint": false,
@@ -520,92 +1887,1209 @@
       }
     },
     {
-      "name": "manage_blocklist",
-      "title": "Manage blocklists",
-      "description": "Create, delete, list, retrieve, add, or remove suppression, do-not-contact, bounce, competitor, or custom blocklist entries.",
+      "name": "list_connection_audit_log",
+      "title": "List Connection Audit Log",
+      "category": "app-connections",
+      "description": "View the audit log of connection lifecycle events (connected, disconnected, test results, errors). Useful for debugging.",
       "inputSchema": {
         "type": "object",
         "properties": {
-          "action": {
+          "connector_id": {
             "type": "string",
-            "enum": [
-              "create",
-              "delete",
-              "add_entries",
-              "remove_entries",
-              "list",
-              "get"
-            ]
-          },
-          "list_type": {
-            "type": "string",
-            "enum": [
-              "suppression",
-              "dnc",
-              "bounce",
-              "competitor",
-              "custom"
-            ]
-          },
-          "entry_type": {
-            "type": "string",
-            "enum": [
-              "email",
-              "domain",
-              "company",
-              "phone",
-              "linkedin_url"
-            ]
-          },
-          "value": {
-            "type": "string"
-          },
-          "entries": {
-            "type": "array",
-            "maxItems": 1000,
-            "items": {
-              "type": "object",
-              "properties": {
-                "value": {
-                  "type": "string"
-                },
-                "entry_type": {
-                  "type": "string"
-                }
-              },
-              "required": [
-                "value"
-              ],
-              "additionalProperties": false
-            }
-          },
-          "entry_id": {
-            "type": "string"
-          },
-          "source_tool": {
-            "type": "string"
+            "description": "Filter to a specific connector ID"
           },
           "limit": {
             "type": "integer",
-            "minimum": 1,
-            "maximum": 500,
-            "default": 50
+            "description": "Max events to return (default 20)"
           },
-          "offset": {
-            "type": "integer",
-            "minimum": 0,
-            "default": 0
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "create_routine",
+      "title": "Create Routine",
+      "category": "ops-routines",
+      "description": "🎯 Create a goal-driven Ops Routine (autonomous agent).\n\nThe agent works on the goal autonomously on a schedule (hourly/daily/weekly) or on-demand (manual), respecting policy guardrails and writing results to configured output sinks.\n\nEXAMPLES OF GOALS:\n- \"Find 50 new fintech CTOs in NYC each week and add them to our outreach list\"\n- \"Monitor our top 100 target accounts daily for hiring signals and push to Slack\"\n- \"Every morning, qualify the leads in 'New Inbound' against our ICP and route to sales\"\n\nOUTPUT SINKS (where results land each tick):\n- { type: 'csv' } — append to a workspace CSV (download via signed URL)\n- { type: 'webhook', config: { url: '...' } } — POST results to your endpoint\n\nAfter creating, set status='active' (or use update_routine) to start ticking.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable name (e.g. \"Weekly Fintech CTO Discovery\")"
+          },
+          "goal": {
+            "type": "string",
+            "description": "Plain-English goal the agent works toward each tick"
+          },
+          "description": {
+            "type": "string",
+            "description": "Optional context: ICP details, exclusions, success criteria"
+          },
+          "cadence": {
+            "type": "string",
+            "enum": [
+              "hourly",
+              "daily",
+              "weekly",
+              "manual"
+            ],
+            "default": "daily",
+            "description": "How often the routine ticks. Use \"manual\" for agent-driven routines that only run via run_routine_now."
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "paused"
+            ],
+            "default": "draft",
+            "description": "Initial status. Set to \"active\" to start ticking immediately."
+          },
+          "timezone": {
+            "type": "string",
+            "default": "UTC",
+            "description": "IANA timezone for cadence scheduling"
+          },
+          "policy": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Guardrails: { max_credits_per_tick, max_records_per_tick, require_approval, ... }"
+          },
+          "output_sinks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string",
+                  "description": "Sink type: csv or webhook"
+                },
+                "config": {
+                  "type": "object",
+                  "additionalProperties": {},
+                  "description": "Type-specific config"
+                },
+                "enabled": {
+                  "type": "boolean",
+                  "description": "Whether this sink is active (default: true)"
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Where each tick writes its results"
+          },
+          "wake_on_events": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Event names that trigger an out-of-schedule tick (e.g. [\"lead.new\", \"signal.detected\"])"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
           }
         },
         "required": [
-          "action"
+          "name",
+          "goal"
         ],
-        "additionalProperties": false
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_routines",
+      "title": "List Routines",
+      "category": "ops-routines",
+      "description": "List all Ops Routines in the workspace. Shows name, status, cadence, last/next tick, and routine ID.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "paused",
+              "archived",
+              "failed"
+            ],
+            "description": "Filter by status"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Max routines to return (default: 50, max: 200)"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_routine",
+      "title": "Get Routine",
+      "category": "ops-routines",
+      "description": "Get full details of an Ops Routine including goal, policy, sinks, recent ticks, and 30-day outcomes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "routine_id": {
+            "type": "string",
+            "description": "Routine UUID"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "routine_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "update_routine",
+      "title": "Update Routine",
+      "category": "ops-routines",
+      "description": "Update an Ops Routine's configuration. Change name, goal, cadence, output sinks, policy guardrails, or status. Setting status='active' activates a draft/paused routine; status='paused' stops scheduled ticks (manual run_routine_now still works).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "routine_id": {
+            "type": "string",
+            "description": "Routine UUID to update"
+          },
+          "name": {
+            "type": "string",
+            "description": "New name"
+          },
+          "goal": {
+            "type": "string",
+            "description": "New goal"
+          },
+          "description": {
+            "type": "string",
+            "description": "New description"
+          },
+          "cadence": {
+            "type": "string",
+            "enum": [
+              "hourly",
+              "daily",
+              "weekly",
+              "manual"
+            ],
+            "description": "New cadence"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "draft",
+              "active",
+              "paused"
+            ],
+            "description": "New status"
+          },
+          "timezone": {
+            "type": "string",
+            "description": "New timezone"
+          },
+          "policy": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "New policy guardrails"
+          },
+          "output_sinks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "config": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Replace output sinks array"
+          },
+          "wake_on_events": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Replace wake_on_events array"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "routine_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "run_routine_now",
+      "title": "Run Routine Now",
+      "category": "ops-routines",
+      "description": "Manually trigger an Ops Routine to tick immediately, bypassing its schedule. Returns a run_id you can use to track the tick. Optional 'instruction' lets you steer this specific run (e.g. \"focus on EU companies this time\"); the routine's permanent goal is unchanged.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "routine_id": {
+            "type": "string",
+            "description": "ID of the routine to trigger"
+          },
+          "instruction": {
+            "type": "string",
+            "description": "Optional one-off instruction to steer this tick"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "routine_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "delete_routine",
+      "title": "Delete Routine",
+      "category": "ops-routines",
+      "description": "Delete an Ops Routine. By default this is a soft-delete (archives the routine and stops further ticks; historical ticks/items are preserved). Pass permanent=true to hard-delete the routine and cascade-delete all its ticks and items. Requires confirm=true.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "routine_id": {
+            "type": "string",
+            "description": "Routine UUID to delete"
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true to confirm deletion"
+          },
+          "permanent": {
+            "type": "boolean",
+            "description": "If true, hard-delete (cascade ticks/items). Default: false (soft-archive)."
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "routine_id",
+          "confirm"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
       },
       "annotations": {
         "readOnlyHint": false,
         "destructiveHint": true,
-        "idempotentHint": false
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_routine_ticks",
+      "title": "Get Routine Ticks",
+      "category": "ops-routines",
+      "description": "List historical ticks for an Ops Routine — when it ran, status (queued/running/completed/failed), records produced, credits used, and any error message. Use 'before' for pagination. To fetch actual rows produced by a tick, call get_tick_items(tick_id) or get_last_tick_items(routine_id).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "routine_id": {
+            "type": "string",
+            "description": "ID of the routine"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Max ticks to return (default: 50, max: 200)"
+          },
+          "before": {
+            "type": "string",
+            "description": "ISO timestamp — return ticks started before this (for pagination)"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "routine_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_tick_items",
+      "title": "Get Tick Items",
+      "category": "ops-routines",
+      "description": "Fetch the actual records produced by a single Ops Routine tick. Returns rows from gtm_routine_items (item_data jsonb + subject_key + state) for the given tick_id. Paginate with 'cursor' (ISO created_at) and 'limit' (max 500).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "tick_id": {
+            "type": "string",
+            "description": "Tick UUID"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Max items to return (default: 100, max: 500)"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "created_at ISO timestamp for pagination"
+          },
+          "state": {
+            "type": "string",
+            "description": "Optional filter: only items with this state"
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "description": "Response format"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "tick_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_last_tick_items",
+      "title": "Get Last Tick Items",
+      "category": "ops-routines",
+      "description": "Convenience: fetch the records produced by the most recent successful tick of an Ops Routine, in one call. Equivalent to get_routine_ticks(routine_id, limit=1) → get_tick_items(latest_tick_id). This is the 80% case for \"show me what this routine just produced\". Paginate with 'cursor' + 'limit' (max 500).",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "routine_id": {
+            "type": "string",
+            "description": "ID of the routine"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Max items to return (default: 100, max: 500)"
+          },
+          "cursor": {
+            "type": "string",
+            "description": "created_at ISO timestamp for pagination"
+          },
+          "state": {
+            "type": "string",
+            "description": "Optional filter: only items with this state"
+          },
+          "include_failed_ticks": {
+            "type": "boolean",
+            "description": "If true, also consider failed/partial ticks. Default: false."
+          },
+          "format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "description": "Response format"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "routine_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_routine_results",
+      "title": "Get Routine Results",
+      "category": "ops-routines",
+      "description": "🤖 AGENT CONVENIENCE: Get the latest results from an Ops Routine as structured JSON.\n\nCombines get_routine + get_last_tick_items into one call. Returns routine metadata, tick info, and all produced items in a single response. Perfect for agent consumption — always returns JSON regardless of output_format setting.\n\nUse this when you need to:\n- Check what an Op just produced\n- Pull results into your agent's context for further processing\n- Chain Op outputs into another tool call",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "routine_id": {
+            "type": "string",
+            "description": "ID of the routine to get results from"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Max items to return (default: 100, max: 500)"
+          },
+          "include_failed_ticks": {
+            "type": "boolean",
+            "description": "Include results from failed/partial ticks"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "routine_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "agent_workflow",
+      "title": "Agent Workflow",
+      "category": "ops-routines",
+      "description": "🤖 AGENT ORCHESTRATION: Create, trigger, and optionally wait for an Ops Routine in a single call.\n\nThis is the primary tool for agents that want to spin up an autonomous Op, run it, and get results back.\n\nWorkflow:\n1. Creates a manual-cadence Ops Routine with your goal and config\n2. Activates it and triggers an immediate tick\n3. If wait=true (default), polls until the tick completes and returns results\n4. If wait=false, returns the routine_id and run_id for you to poll later\n\nEXAMPLES:\n- { goal: \"Find 50 SaaS founders in Austin TX\", name: \"Austin SaaS Discovery\", output_sinks: [{type: \"csv\"}] }\n- { goal: \"Enrich these companies with hiring signals\", name: \"Company Enrichment\", instruction: \"Focus on Series A-C companies\" }\n- { goal: \"Score these leads against our ICP\", name: \"ICP Scoring\", wait: false }",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Human-readable name for this workflow run"
+          },
+          "goal": {
+            "type": "string",
+            "description": "Plain-English goal for the agent to accomplish"
+          },
+          "description": {
+            "type": "string",
+            "description": "Additional context: ICP details, exclusions, success criteria"
+          },
+          "instruction": {
+            "type": "string",
+            "description": "One-off instruction to steer the first tick"
+          },
+          "policy": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Guardrails: { max_credits_per_tick, max_records_per_tick }"
+          },
+          "output_sinks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "config": {
+                  "type": "object",
+                  "additionalProperties": {}
+                },
+                "enabled": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Where to deliver results (default: csv)"
+          },
+          "wake_on_events": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Event types to subscribe to for future triggers"
+          },
+          "wait": {
+            "type": "boolean",
+            "default": true,
+            "description": "If true (default), poll until the tick completes and return results. If false, return immediately with routine_id and run_id."
+          },
+          "max_wait_seconds": {
+            "type": "integer",
+            "default": 300,
+            "description": "Max seconds to wait for tick completion (default: 300 = 5 min)"
+          },
+          "cleanup": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, delete the routine after retrieving results (for one-shot workflows)"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "name",
+          "goal"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "emit_event",
+      "title": "Emit Event",
+      "category": "ops-routines",
+      "description": "Fire an event that wakes any active Op subscribed to that event type (via its wake_on_events list). Example use cases: pipe Crunchbase funding notifications, LinkedIn job change webhooks, intent signals from Bombora, or custom events from Zapier. Include a dedup_key if you expect the same external event might be delivered twice — identical (workspace_id, dedup_key) pairs are no-oped.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "event_type": {
+            "type": "string",
+            "description": "Event type string (e.g., \"company_funded\", \"executive_hired\", \"acme.crm.deal_won\")"
+          },
+          "subject_key": {
+            "type": "string",
+            "description": "Identifier of the subject (email, domain, company_id)"
+          },
+          "source": {
+            "type": "string",
+            "description": "Source system (e.g., \"crunchbase\", \"zapier\")"
+          },
+          "dedup_key": {
+            "type": "string",
+            "description": "Dedup key for idempotency"
+          },
+          "metadata": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Event payload — passed to the routine as context"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "event_type"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "approvals_list",
+      "title": "Approvals List",
+      "category": "approvals",
+      "description": "List human-in-the-loop approval requests for the workspace. Use this to see what any Op is waiting for you to approve.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "approved",
+              "rejected"
+            ],
+            "description": "Filter by status (default: pending)"
+          },
+          "routine_id": {
+            "type": "string",
+            "description": "Only show approvals from one Op"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Max approvals to return"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "approvals_decide",
+      "title": "Approvals Decide",
+      "category": "approvals",
+      "description": "Approve or reject one or more pending approvals. Completes the Trigger.dev waitpoint token so the paused Op resumes. Use token_id for single OR token_ids for batch.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "decision": {
+            "type": "string",
+            "enum": [
+              "approved",
+              "rejected"
+            ],
+            "description": "Your decision"
+          },
+          "token_id": {
+            "type": "string",
+            "description": "Single token to decide (use this OR token_ids)"
+          },
+          "token_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Batch of tokens to decide"
+          },
+          "reviewer_notes": {
+            "type": "string",
+            "description": "Optional notes for the decision"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "decision"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "set_item_feedback",
+      "title": "Set Item Feedback",
+      "category": "approvals",
+      "description": "Provide human-in-the-loop feedback on a produced lead/item. Feedback is used by the agent to improve future ticks.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "item_id": {
+            "type": "string",
+            "description": "Item UUID from get_tick_items / get_last_tick_items"
+          },
+          "feedback": {
+            "type": "string",
+            "enum": [
+              "good",
+              "bad",
+              "skip"
+            ],
+            "description": "Your feedback on this item"
+          },
+          "reason": {
+            "type": "string",
+            "description": "Optional reason for the feedback"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "item_id",
+          "feedback"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_output_sinks",
+      "title": "List Output Sinks",
+      "category": "workspace-controls",
+      "description": "[DEPRECATED] Native output sinks have been removed. Signaliz now outputs structured JSON (via row retrieval), CSV artifacts (signed URLs), and optional webhook POSTs. Use external MCPs or APIs for downstream routing.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "quickstart_gtm_book",
+      "title": "Quickstart GTM Book",
+      "category": "gtm-books",
+      "description": "Launch a GTM Campaign Book — a coordinated fleet of Ops Routines working together. Define multiple ops with different goals that share an ICP and cadence. Perfect for multi-pronged campaigns.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "book_name": {
+            "type": "string",
+            "description": "Campaign book name"
+          },
+          "ops": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "goal": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                }
+              },
+              "required": [
+                "name",
+                "goal"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Array of ops to create (1-20)"
+          },
+          "cadence": {
+            "type": "string",
+            "enum": [
+              "hourly",
+              "daily",
+              "weekly"
+            ],
+            "default": "daily",
+            "description": "Shared cadence for all ops"
+          },
+          "shared_icp": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Shared ICP criteria for all ops"
+          },
+          "default_sinks": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "config": {
+                  "type": "object",
+                  "additionalProperties": {}
+                }
+              },
+              "required": [
+                "type"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Default output sinks for all ops"
+          },
+          "default_policy": {
+            "type": "object",
+            "additionalProperties": {},
+            "description": "Default policy for all ops"
+          },
+          "activate": {
+            "type": "boolean",
+            "default": false,
+            "description": "If true, activate all ops immediately"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "book_name",
+          "ops"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_books",
+      "title": "List Books",
+      "category": "gtm-books",
+      "description": "List all GTM Campaign Books in the workspace.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "book_roll_up",
+      "title": "Book Roll Up",
+      "category": "gtm-books",
+      "description": "Get aggregated performance metrics for a GTM Campaign Book across all its ops.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "book_id": {
+            "type": "string",
+            "description": "Book UUID"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "book_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "list_icps",
+      "title": "List ICPS",
+      "category": "icps",
+      "description": "List all Ideal Customer Profiles (ICPs) in the workspace. Returns ICP name, criteria, and Octave import status. Use this to discover available ICPs for providing context to AI prompts, lead generation, and outreach copy.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "include_octave_data": {
+            "type": "boolean",
+            "default": false,
+            "description": "Include full Octave playbook data (default: false)"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "get_icp",
+      "title": "Get ICP",
+      "category": "icps",
+      "description": "Get full details of a specific ICP including all criteria: industry focus, target titles, departments, geography, pain points, buying triggers, tech stack, revenue/employee ranges, and Octave playbook data. Use this to provide rich ICP context to AI prompts for lead scoring, outreach personalization, and content generation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "icp_id": {
+            "type": "string",
+            "description": "UUID of the ICP to retrieve"
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "required": [
+          "icp_id"
+        ],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "import_icps_from_octave",
+      "title": "Import ICPS From Octave",
+      "category": "icps",
+      "description": "Import playbooks from Octave as ICPs into Signaliz. Requires Octave to be connected in workspace settings. Each playbook becomes an ICP with criteria mapped automatically. Skips already-imported playbooks.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "playbook_ids": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Specific Octave playbook IDs to import. Omit to import all."
+          },
+          "output_format": {
+            "type": "string",
+            "enum": [
+              "markdown",
+              "json"
+            ],
+            "default": "markdown",
+            "description": "Response format. Use 'json' for programmatic/agent consumption."
+          }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
       }
     }
   ]

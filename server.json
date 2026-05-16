@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.signaliz/signaliz-mcp",
   "title": "Signaliz",
-  "description": "B2B email verification, company signal enrichment, and governed GTM data pipelines.",
-  "version": "2.0.0",
+  "description": "B2B lead generation, email verification, company enrichment, and agentic GTM Ops.",
+  "version": "2.0.1",
   "websiteUrl": "https://signaliz.com",
   "repository": {
     "id": "1236179880",
@@ -47,16 +47,19 @@
       "categories": [
         "sales",
         "go-to-market",
+        "lead-generation",
         "data-enrichment",
         "email-verification",
         "data-quality",
-        "automation"
+        "automation",
+        "agentic-ops"
       ],
       "auth": {
         "type": "api_key_or_oauth",
         "oauthProtectedResource": "https://api.signaliz.com/functions/v1/signaliz-mcp/.well-known/oauth-protected-resource"
       },
-      "toolSchema": "https://github.com/signaliz/signaliz-mcp/blob/main/tools/tools.json"
+      "toolSchema": "https://github.com/signaliz/signaliz-mcp/blob/main/tools/tools.json",
+      "npmPackage": "@signaliz/mcp-server"
     }
   }
 }
