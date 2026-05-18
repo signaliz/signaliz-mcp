@@ -101,11 +101,13 @@ The full indexable tool schema lives in [`tools/tools.json`](tools/tools.json). 
 | --- | --- |
 | `find_and_verify_emails` | Finds and verifies emails for up to 5,000 contacts asynchronously. |
 | `verify_emails` | Verifies up to 5,000 emails asynchronously. |
-| `enrich_company_signals_batch` | Enriches signals for up to 5,000 companies asynchronously. |
+| `enrich_company_signals_batch` | Enriches signals for up to 5,000 companies asynchronously, with realistic queue/ETA metadata and partial-result recovery. |
 | `batch_http_request` | Executes up to 5,000 HTTP requests asynchronously. |
 | `check_job_status` | Polls async jobs, reports progress, and retrieves paginated results. |
 
 Batch tools return a `job_id` immediately. Poll with `check_job_status`, or pass `callback_url` and optional `callback_secret` on supported batch tools to receive a completion webhook.
+
+For long-running company-signal batches, `check_job_status` is the recovery contract as well as the status endpoint: completed terminal rows are returned for `completed`, `partial`, and `failed` jobs, and in-flight jobs can return completed rows when called with `include_partial_results: true`. Retry only rows marked `_status: "failed"` or `_timed_out: true`; successful rows remain usable even if a later record times out.
 
 ### Lead and Account Discovery
 
