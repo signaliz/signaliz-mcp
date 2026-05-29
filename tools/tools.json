@@ -3091,6 +3091,200 @@
         "idempotentHint": false,
         "openWorldHint": false
       }
+    },
+    {
+      "name": "ingest_instantly_history",
+      "title": "Ingest Instantly History",
+      "category": "campaign_memory",
+      "description": "Import historical Instantly campaigns, leads, replies, and outcomes into private workspace campaign memory. No external writes; network learning is disabled for v1.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "campaigns": { "type": "array", "items": { "type": "object" } },
+          "leads": { "type": "array", "items": { "type": "object" } },
+          "events": { "type": "array", "items": { "type": "object" } },
+          "client_name": { "type": "string" },
+          "campaign_name": { "type": "string" },
+          "objective": { "type": "string" },
+          "source_ref": { "type": "object" },
+          "create_memory": { "type": "boolean", "default": true },
+          "dry_run": { "type": "boolean", "default": false },
+          "output_format": { "type": "string", "enum": ["markdown", "json"], "default": "markdown" }
+        },
+        "additionalProperties": true,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": { "readOnlyHint": false, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false }
+    },
+    {
+      "name": "query_campaign_memory",
+      "title": "Query Campaign Memory",
+      "category": "campaign_memory",
+      "description": "Query private workspace campaign memory and the read-only CMM seed corpus for ICP, copy, provider, and outcome lessons. Network benchmarks are disabled for v1.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "icp": { "type": "string" },
+          "persona": { "type": "string" },
+          "trigger": { "type": "string" },
+          "client_name": { "type": "string" },
+          "dimension": { "type": "string" },
+          "include_seed_corpus": { "type": "boolean", "default": true },
+          "limit": { "type": "number", "default": 8 },
+          "output_format": { "type": "string", "enum": ["markdown", "json"], "default": "markdown" }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false }
+    },
+    {
+      "name": "scope_campaign",
+      "title": "Scope Campaign",
+      "category": "campaign_builder",
+      "description": "Turn a GTM campaign request into ICP, copy thesis, provider chain, approval policy, and dry-run build arguments.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "prompt": { "type": "string" },
+          "client_name": { "type": "string" },
+          "client_context": { "type": "string" },
+          "campaign_goal": { "type": "string" },
+          "target_count": { "type": "number" },
+          "destinations": { "type": "array", "items": { "type": "object" } },
+          "approval_policy": { "type": "string" },
+          "output_format": { "type": "string", "enum": ["markdown", "json"], "default": "markdown" }
+        },
+        "required": ["prompt"],
+        "additionalProperties": true,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false }
+    },
+    {
+      "name": "save_campaign_brief",
+      "title": "Save Campaign Brief",
+      "category": "campaign_memory",
+      "description": "Persist a campaign brief / GTM experiment object into private workspace memory.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "campaign_name": { "type": "string" },
+          "objective": { "type": "string" },
+          "client_name": { "type": "string" },
+          "icp": { "type": "object" },
+          "personas": { "type": "array", "items": { "type": "object" } },
+          "source_strategy": { "type": "array", "items": { "type": "object" } },
+          "message_thesis": { "type": "object" },
+          "privacy_scope": { "type": "string", "enum": ["private"] },
+          "status": { "type": "string" },
+          "output_format": { "type": "string", "enum": ["markdown", "json"], "default": "markdown" }
+        },
+        "required": ["campaign_name", "objective"],
+        "additionalProperties": true,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": { "readOnlyHint": false, "destructiveHint": false, "idempotentHint": false, "openWorldHint": false }
+    },
+    {
+      "name": "build_campaign",
+      "title": "Build Campaign",
+      "category": "campaign_builder",
+      "description": "Launch an approval-gated campaign build. Use dry_run first; real Trigger work requires confirm_spend=true and supports idempotency_key.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "name": { "type": "string" },
+          "prompt": { "type": "string" },
+          "experiment_brief_id": { "type": "string" },
+          "target_count": { "type": "number" },
+          "dry_run": { "type": "boolean" },
+          "allow_downscale": { "type": "boolean" },
+          "confirm_spend": { "type": "boolean" },
+          "idempotency_key": { "type": "string" },
+          "icp": { "type": "object" },
+          "policy": { "type": "object" },
+          "delivery": { "type": "object" },
+          "output_format": { "type": "string", "enum": ["markdown", "json"], "default": "markdown" }
+        },
+        "required": ["name", "prompt"],
+        "additionalProperties": true,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": { "readOnlyHint": false, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false }
+    },
+    {
+      "name": "get_campaign_build_status",
+      "title": "Get Campaign Build Status",
+      "category": "campaign_builder",
+      "description": "Poll campaign build progress across acquisition, signals, qualification, copy, and delivery phases.",
+      "inputSchema": {
+        "type": "object",
+        "properties": { "campaign_build_id": { "type": "string" } },
+        "required": ["campaign_build_id"],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false }
+    },
+    {
+      "name": "get_campaign_build_rows",
+      "title": "Get Campaign Build Rows",
+      "category": "campaign_builder",
+      "description": "Retrieve campaign build rows for review, approval, or agent-side routing.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "campaign_build_id": { "type": "string" },
+          "page_size": { "type": "number" },
+          "cursor": { "type": "string" },
+          "filters": { "type": "object" }
+        },
+        "required": ["campaign_build_id"],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false }
+    },
+    {
+      "name": "approve_campaign_delivery",
+      "title": "Approve Campaign Delivery",
+      "category": "campaign_builder",
+      "description": "Approve external delivery such as webhook POSTs or loading approved leads into Instantly.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "campaign_build_id": { "type": "string" },
+          "destination_type": { "type": "string", "enum": ["json", "csv", "webhook", "instantly"] },
+          "destination_id": { "type": "string" },
+          "destination_config": { "type": "object" }
+        },
+        "required": ["campaign_build_id", "destination_type"],
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": { "readOnlyHint": false, "destructiveHint": false, "idempotentHint": false, "openWorldHint": false }
+    },
+    {
+      "name": "recommend_next_experiment",
+      "title": "Recommend Next Experiment",
+      "category": "campaign_memory",
+      "description": "Recommend the next private GTM experiment from campaign memory and outcomes.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": { "type": "string" },
+          "experiment_brief_id": { "type": "string" },
+          "campaign_build_id": { "type": "string" },
+          "objective": { "type": "string" },
+          "constraints": { "type": "object" },
+          "output_format": { "type": "string", "enum": ["markdown", "json"], "default": "markdown" }
+        },
+        "additionalProperties": false,
+        "$schema": "http://json-schema.org/draft-07/schema#"
+      },
+      "annotations": { "readOnlyHint": true, "destructiveHint": false, "idempotentHint": true, "openWorldHint": false }
     }
   ]
 }

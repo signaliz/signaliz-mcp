@@ -1,6 +1,6 @@
 # Signaliz MCP
 
-Signaliz is a B2B data quality, enrichment, and agentic GTM platform for go-to-market teams and AI agents. The Signaliz MCP server gives MCP clients access to 60+ Signaliz API capabilities for verified lead generation, email verification, company enrichment, data-quality pipelines, Ops routines, approvals, ICPs, app actions, and workspace controls.
+Signaliz is a B2B data quality, enrichment, and agentic GTM platform for go-to-market teams and AI agents. The Signaliz MCP server gives MCP clients access to 70+ Signaliz API capabilities for verified lead generation, email verification, company enrichment, campaign memory, approval-gated campaign building, data-quality pipelines, Ops routines, approvals, ICPs, app actions, and workspace controls.
 
 This repository is the public distribution manifest for Signaliz MCP. It contains registry metadata, indexable tool schemas, and setup instructions for MCP directories and clients. The production server is hosted by Signaliz; this repository does not contain the private server implementation.
 
@@ -65,6 +65,8 @@ Signaliz exposes tools for:
 - Running custom AI prompts across records with structured output fields.
 - Calling external APIs through generic HTTP tools.
 - Uploading lists and running governed Signaliz systems against them.
+- Importing historical campaign outcomes into private workspace memory.
+- Scoping and building campaigns behind explicit spend and delivery approvals.
 - Creating autonomous Ops Routines that work on a GTM goal over time.
 - Chaining routines, streaming results, emitting events, and resolving approvals.
 - Connecting apps, discovering available actions, and executing app actions through Signaliz.
@@ -115,6 +117,20 @@ Batch tools return a `job_id` immediately. Poll with `check_job_status`, or pass
 | `generate_local_leads` | Finds local businesses and verified contact emails from Google Maps-style local search. |
 | `find_people_blitz` | Finds professional profiles without verified emails for research and list building. |
 | `find_companies_blitz` | Finds company records for account discovery, market sizing, and TAM research. |
+
+### Campaign Memory and Builder
+
+| Tool | What it does |
+| --- | --- |
+| `ingest_instantly_history` | Imports historical Instantly campaigns, leads, replies, and outcomes into private workspace campaign memory. |
+| `query_campaign_memory` | Searches private workspace campaign memory and the read-only CMM seed corpus for ICP, copy, provider, and outcome lessons. |
+| `scope_campaign` | Turns a GTM campaign request into ICP, copy thesis, provider chain, approval policy, and dry-run build arguments. |
+| `save_campaign_brief` | Persists a campaign brief or GTM experiment object into private workspace memory. |
+| `build_campaign` | Launches an approval-gated campaign build; use dry runs first and require explicit spend confirmation for real Trigger work. |
+| `get_campaign_build_status` | Polls campaign build progress across acquisition, signals, qualification, copy, and delivery phases. |
+| `get_campaign_build_rows` | Retrieves campaign build rows for review, approval, or agent-side routing. |
+| `approve_campaign_delivery` | Approves external delivery such as webhook posts or loading approved leads into Instantly. |
+| `recommend_next_experiment` | Recommends the next private GTM experiment from campaign memory and outcomes. |
 
 ### Lists, Systems, and Pipeline Runs
 
