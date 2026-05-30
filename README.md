@@ -113,8 +113,8 @@ Batch tools return a `job_id` immediately. Poll with `check_job_status`, or pass
 | --- | --- |
 | `generate_leads` | Finds B2B professionals with company data and verified emails for outreach-ready lead lists. |
 | `generate_local_leads` | Finds local businesses and verified contact emails from Google Maps-style local search. |
-| `find_people_blitz` | Finds professional profiles without verified emails for research and list building. |
-| `find_companies_blitz` | Finds company records for account discovery, market sizing, and TAM research. |
+| `find_people_signaliz` | Finds professional profiles without verified emails for research and list building. |
+| `find_companies_signaliz` | Finds company records for account discovery, market sizing, and TAM research. |
 
 ### Lists, Systems, and Pipeline Runs
 
