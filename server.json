@@ -2,8 +2,8 @@
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.signaliz/signaliz-mcp",
   "title": "Signaliz",
-  "description": "B2B lead generation, email verification, company enrichment, and agentic GTM Ops.",
-  "version": "2.0.1",
+  "description": "B2B lead generation, email verification, company enrichment, Campaign Builder, and agentic GTM Ops.",
+  "version": "2.0.11",
   "websiteUrl": "https://signaliz.com",
   "repository": {
     "id": "1236179880",
