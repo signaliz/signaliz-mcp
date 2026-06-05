@@ -1,8 +1,10 @@
 # Signaliz MCP
 
-Signaliz is a B2B data quality, enrichment, and agentic GTM platform for go-to-market teams and AI agents. The Signaliz MCP server gives MCP clients access to 60+ Signaliz API capabilities for verified lead generation, email verification, company enrichment, data-quality pipelines, Ops routines, approvals, ICPs, app actions, and workspace controls.
+Signaliz is a B2B data quality, enrichment, Campaign Builder, and agentic GTM Ops platform for go-to-market teams and AI agents. The Signaliz MCP server gives MCP clients access to Signaliz capabilities for verified lead generation, email verification, company enrichment, Campaign Builder, Ops, approvals, connected-app actions, ICPs, workspace controls, and durable GTM memory.
 
 This repository is the public distribution manifest for Signaliz MCP. It contains registry metadata, indexable tool schemas, and setup instructions for MCP directories and clients. The production server is hosted by Signaliz; this repository does not contain the private server implementation.
+
+Current public npm bridge: [`@signaliz/mcp-server@2.0.11`](https://www.npmjs.com/package/@signaliz/mcp-server).
 
 ## Hosted Endpoint
 
@@ -54,6 +56,12 @@ Claude Desktop, Cursor, Windsurf, Cline, and other stdio clients can use:
 }
 ```
 
+Optional base URL override:
+
+```bash
+SIGNALIZ_API_URL=https://api.signaliz.com/functions/v1
+```
+
 ## What Signaliz Does
 
 Signaliz exposes tools for:
@@ -62,6 +70,9 @@ Signaliz exposes tools for:
 - Verifying deliverability for one email or thousands of emails.
 - Discovering buying signals such as hiring, funding, product launches, partnerships, leadership changes, expansion, acquisitions, awards, regulatory events, and earnings.
 - Finding B2B professionals, target accounts, local businesses, or outreach-ready leads.
+- Building approval-gated campaigns from plain-English GTM briefs.
+- Reading campaign build status, reviewed rows, CSV artifacts, and delivery readiness.
+- Planning, executing, waiting on, approving, and retrieving Ops work.
 - Running custom AI prompts across records with structured output fields.
 - Calling external APIs through generic HTTP tools.
 - Uploading lists and running governed Signaliz systems against them.
@@ -80,7 +91,7 @@ Signaliz is not positioned as unlimited-volume or all-you-can-use data. The prod
 
 ## Capability Index
 
-The full indexable tool schema lives in [`tools/tools.json`](tools/tools.json). It is generated from the actual `@signaliz/mcp-server@2.0.1` `tools/list` response so directories can index the same names, descriptions, and input schemas exposed by the npm bridge.
+The full indexable tool schema lives in [`tools/tools.json`](tools/tools.json). It should be regenerated from the authenticated `@signaliz/mcp-server@2.0.11` `tools/list` response whenever the npm bridge changes so directories can index the same names, descriptions, and input schemas exposed by the bridge.
 
 ### Email, Contact, and Company Enrichment
 
@@ -113,8 +124,21 @@ Batch tools return a `job_id` immediately. Poll with `check_job_status`, or pass
 | --- | --- |
 | `generate_leads` | Finds B2B professionals with company data and verified emails for outreach-ready lead lists. |
 | `generate_local_leads` | Finds local businesses and verified contact emails from Google Maps-style local search. |
-| `find_people_blitz` | Finds professional profiles without verified emails for research and list building. |
-| `find_companies_blitz` | Finds company records for account discovery, market sizing, and TAM research. |
+| `find_people_signaliz` | Finds professional profiles without verified emails for research and list building. |
+| `find_companies_signaliz` | Finds company records for account discovery, market sizing, and TAM research. |
+
+### Campaign Builder and GTM Memory
+
+| Tool | What it does |
+| --- | --- |
+| `build_campaign` | Builds an approval-gated campaign from a GTM brief; use dry-runs before spendful work. |
+| `get_campaign_build_status` | Polls campaign build progress across acquisition, signals, qualification, copy, and delivery phases. |
+| `get_campaign_build_rows` | Retrieves reviewed campaign rows for approval, export, or agent-side routing. |
+| `gtm_existing_campaign_audit` | Audits historical campaign context and lessons. |
+| `gtm_campaign_execution_status` | Reads campaign execution state. |
+| `gtm_campaign_learning_status` | Reads learning, feedback, and Brain readiness state. |
+| `get_tool_manifest` | Returns the current tool manifest with categories, safety metadata, and examples. |
+| `discover_capabilities` | Finds the right Signaliz capability or tool by intent. |
 
 ### Lists, Systems, and Pipeline Runs
 
@@ -129,10 +153,16 @@ Batch tools return a `job_id` immediately. Poll with `check_job_status`, or pass
 | `get_run` | Gets one system run's status and results. |
 | `list_runs` | Lists recent system runs with status, timing, and summaries. |
 
-### Ops Routines as Agents
+### Ops
 
 | Tool | What it does |
 | --- | --- |
+| `ops_plan` | Previews a safe execution plan for a GTM goal. |
+| `ops_execute` | Creates or runs an operation when confirmation is supplied. |
+| `ops_status` | Reads operation progress and execution state. |
+| `ops_wait` | Waits for an operation or run to reach a terminal state. |
+| `ops_results` | Retrieves operation outputs. |
+| `ops_approve` | Resolves human-in-the-loop approvals. |
 | `create_routine` | Creates a goal-driven Ops Routine with cadence, policy guardrails, wake events, and output sinks. |
 | `list_routines` | Lists Ops Routines by status. |
 | `get_routine` | Gets full routine details, policy, sinks, recent ticks, and outcomes. |
@@ -197,6 +227,15 @@ Batch tools return a `job_id` immediately. Poll with `check_job_status`, or pass
 - Smithery URL-publish config schema: [`smithery.config-schema.json`](smithery.config-schema.json)
 - Glama ownership metadata: [`glama.json`](glama.json)
 - OAuth details: [`docs/authentication.md`](docs/authentication.md)
+
+## Related Signaliz Resources
+
+- Public Signaliz hub: https://github.com/signaliz/signaliz
+- API docs: https://signaliz.com/api-docs
+- OpenAPI spec: https://signaliz.com/openapi.json
+- CLI package: https://www.npmjs.com/package/@signaliz/cli
+- SDK package: https://www.npmjs.com/package/@signaliz/sdk
+- Downloadable skills: https://github.com/signaliz/signaliz-skills
 
 ## Safety Notes
 
